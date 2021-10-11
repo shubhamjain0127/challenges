@@ -7,7 +7,7 @@ The code allows for a particular data key to be retrieved individually
 Here I am using az cli commands to get the meta data of Virtual Machine in Azure Cloud. As a pre-requisite az cli should be installed on machine where these command will run.
 
 ```
-# Method of authentication can differ. It can be either using SPN or interactive user login. We can hide the sensitive data like client secret depeneding upon the tool I wea er using. Ex: in Ansible we can store the SPN data as credential and we can use shell module to execute below commands.
+# Method of authentication can differ. It can be either using SPN or interactive user login. We can hide the sensitive data like client secret depeneding upon the tool we are using. Ex: in Ansible we can store the SPN data as credential and we can use shell module to execute below commands.
 az login --service-principal -u "<SPN-CLIENT-ID>" -p "<SPN-CLIENT-SECRET>" --tenant "<YOUR-TENANT-ID>" ;
 az account set --subscription "<YOUR-SUBSCRIPTION-ID>"
 
