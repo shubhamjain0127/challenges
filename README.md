@@ -1,5 +1,7 @@
 # challenges
-- Challenge 2: We need to write code that will query the meta data of an instance within AWS and provide a
+
+
+- **Challenge 2:** We need to write code that will query the meta data of an instance within AWS and provide a
 json formatted output. The choice of language and implementation is up to you.
 Bonus Points
 The code allows for a particular data key to be retrieved individually
@@ -18,4 +20,23 @@ az vm show --name "<VM-NAME>" --resource-group "<RG-NAME>"
 
 az vm show --name "<VM-NAME>" --resource-group "<RG-NAME>" --query type
 az vm show --name "<VM-NAME>" --resource-group "<RG-NAME>" --query tags
+```
+
+- **Challenge 3**: Create a function which accepts object and key and prints the value.
+
+Here I am using python to create the function which will take the object and key as input . It will first create the json object to python dictionary and key to an array by splitting delimiter "\".
+
+
+```
+import json
+
+def giveValue(a,b):
+    x = b.split("/")
+    y= json.loads(a)
+    value = y[x[0]][x[1]][x[2]]
+    return value
+    
+value = giveValue('{"x" : {"y" : {"z": "a"}}}',"x/y/z")
+
+print(value)
 ```
