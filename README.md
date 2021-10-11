@@ -12,10 +12,10 @@ az login --service-principal -u "<SPN-CLIENT-ID>" -p "<SPN-CLIENT-SECRET>" --ten
 az account set --subscription "<YOUR-SUBSCRIPTION-ID>"
 
 # Below command prints all the data of VM in json format
-az vm show --name "<VM-NAME>"  --resource-group "<RG-NAME>"
+az vm show --name "<VM-NAME>" --resource-group "<RG-NAME>"
 
-# Below commands are used to get a specific properties of VM in azure
+# Below commands are used to get specific properties of VM in azure
 
-az vm show --name "<VM-NAME>"  --resource-group "<RG-NAME>" --query type
-az vm show --name "<VM-NAME>"  --resource-group "<RG-NAME>" --query tags
+az vm show --name "<VM-NAME>" --resource-group "<RG-NAME>" --query type
+az vm show --name "<VM-NAME>" --resource-group "<RG-NAME>" --query tags
 ```
