@@ -1,0 +1,89 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "type": "string"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "name": "myVnet",
+            "type": "Microsoft.Network/VirtualNetworks",
+            "apiVersion": "2021-01-01",
+            "location": "[parameters('location')]",
+            "dependsOn": [],
+            "tags": {},
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "10.2.0.0/16"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "websubnet",
+                        "properties": {
+                            "addressPrefix": "10.2.0.0/24"
+                        }
+                    },
+                    {
+                        "name": "appsubnet",
+                        "properties": {
+                            "addressPrefix": "10.2.1.0/24"
+                        }
+                    }
+                ],
+                "enableDdosProtection": false
+            }
+        },
+        {
+                "type": "Microsoft.Compute/availabilitySets",
+                "name": "[concat('avs', copyIndex(1))]",
+                "apiVersion": "2019-07-01",
+                "location": "[parameters('location')]",
+                "properties": {
+                    "platformFaultDomainCount": 2,
+                    "platformUpdateDomainCount": 5
+                },
+                "sku": {
+                    "name": "Aligned"
+                },
+                "tags": {
+                    "ENVIRONMENT": "TEST"
+                },
+                "copy": {
+                    "name": "avscopy",
+                    "count": 2,
+                    "mode": "Parallel"
+                }
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "name": "webnsg",
+            "apiVersion": "2019-02-01",
+            "location": "[parameters('location')]",
+            "tags": {
+                "ROLE_PURPOSE": "Network Security Group for web subnet",
+                "ENVIRONMENT": "Test"
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/VirtualNetworks', 'myVnet')]"
+            ]
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "name": "appnsg",
+            "apiVersion": "2019-02-01",
+            "location": "[parameters('location')]",
+            "tags": {
+                "ROLE_PURPOSE": "Network Security Group for app subnet",
+                "ENVIRONMENT": "Test"
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/VirtualNetworks', 'myVnet')]"
+            ]
+        }
+    ]
+}
