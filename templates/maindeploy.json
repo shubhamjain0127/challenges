@@ -1,0 +1,120 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "type": "string"
+        },
+        "staurl": {
+            "type": "string"
+        },
+        "sastoken": {
+            "type": "securestring"
+        },
+        "localadminpassword": {
+            "type": "securestring"
+        }
+    },
+    "resources": [
+        {
+        "name": "CreateNetwork",
+        "type": "Microsoft.Resources/deployments",
+        "apiVersion": "2017-05-10",
+        "dependsOn": [],
+        "properties": {
+            "mode": "Incremental",
+            "templateLink": {
+            "uri": "[concat(parameters('staurl'),'network.json?',parameters('sastoken'))]",
+            "contentVersion": "1.0.0.0"
+            },
+            "Parameters": {
+                "location": {
+                    "value": "[parameters('location')]"
+                }
+            }
+        }
+        },
+        {
+        "name": "web-vms",
+        "type": "Microsoft.Resources/deployments",
+        "apiVersion": "2017-05-10",
+        "dependsOn": [
+            "[concat('Microsoft.Resources/deployments/','CreateNetwork')]"
+        ],
+        "properties": {
+            "mode": "Incremental",
+            "templateLink": {
+            "uri": "[concat(parameters('staurl'),'vm.json?',parameters('sastoken'))]",
+            "contentVersion": "1.0.0.0"
+            },
+            "Parameters": {
+                "location": {
+                    "value": "[parameters('location')]"
+                },
+                "subnetName": {
+                    "value": "websubnet"
+                },
+                "virtualNetworkId": {
+                    "value": "[resourceId('Microsoft.Network/virtualNetworks', 'myVnet')]"
+                },
+                "adminPassword": {
+                    "value": "[parameters('localadminpassword')]"
+                },
+                "networkInterfaceName": {
+                    "value": "webnic"
+                },
+                "virtualMachineName": {
+                    "value": "webvm"
+                },
+                "virtualMachineSize": {
+                    "value": "Standard_DS1_v2"
+                },
+                "availabilitySetName": {
+                    "value": "avs1"
+                }
+            }
+        }
+        },
+        {
+        "name": "app-vms",
+        "type": "Microsoft.Resources/deployments",
+        "apiVersion": "2017-05-10",
+        "dependsOn": [
+            "[concat('Microsoft.Resources/deployments/','CreateNetwork')]"
+        ],
+        "properties": {
+            "mode": "Incremental",
+            "templateLink": {
+            "uri": "[concat(parameters('staurl'),'vm.json?',parameters('sastoken'))]",
+            "contentVersion": "1.0.0.0"
+            },
+            "Parameters": {
+                "location": {
+                    "value": "[parameters('location')]"
+                },
+                "subnetName": {
+                    "value": "appsubnet"
+                },
+                "virtualNetworkId": {
+                    "value": "[resourceId('Microsoft.Network/virtualNetworks', 'myVnet')]"
+                },
+                "adminPassword": {
+                    "value": "[parameters('localadminpassword')]"
+                },
+                "networkInterfaceName": {
+                    "value": "appnic"
+                },
+                "virtualMachineName": {
+                    "value": "appvm"
+                },
+                "virtualMachineSize": {
+                    "value": "Standard_DS1_v2"
+                },
+                "availabilitySetName": {
+                    "value": "avs2"
+                }
+            }
+        }
+        }
+    ]
+}
