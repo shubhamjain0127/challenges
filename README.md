@@ -1,4 +1,17 @@
 # challenges
+- **Challenge1**: Create a 3-tier architecture.
+
+Architecture Diagram:
+
+![image](https://user-images.githubusercontent.com/35572868/136897514-47bb599e-129e-4c35-9f31-164c52705b26.png)
+
+
+Here I am using Ansible playbook which will run on Ansible Tower host to create resources mentioned in Architecture diagram on Azure.
+
+Prerquisite:
+1. Ansible Tower
+2. Ansible Template and project to run playbook Create-3-tier-arch.yaml
+3. Valid Subsciption and SPN with Contibutor permissions in the subscription.
 
 
 - **Challenge 2:** We need to write code that will query the meta data of an instance within AWS and provide a
