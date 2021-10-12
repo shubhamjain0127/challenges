@@ -10,8 +10,10 @@ Here I am using Ansible playbook which will run on Ansible Tower host to create 
 
 Prerquisite:
 1. Ansible Tower
-2. Ansible Template and project to run playbook Create-3-tier-arch.yaml
-3. Valid Subsciption and SPN with Contibutor permissions in the subscription.
+2. Azure sdk installed on Ansible
+3. Ansible Template and project to run playbook Create-3-tier-arch.yaml
+4. Valid Subsciption and SPN with Contibutor permissions in the subscription.
+5. Create a credential in Ansible Tower of type Microsoft Azure Resource Manager and attach it to the template.
 
 
 - **Challenge 2:** We need to write code that will query the meta data of an instance within AWS and provide a
