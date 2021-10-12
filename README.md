@@ -25,8 +25,8 @@ Here we will be creating below resources:
 4. a Vnet and 2 subnets (app & web)
 5. 2 availability sets (1 for app vms 1 for web vms)
 6. 4 VMs , 2 for app 2 for web
-7. Primary sql server & database (code is not update to create. However need to complete the above architecture diagram).
-8. Secondary sql server & failover group which would create a secondary database and enable replication.
+7. Primary sql server & database (ansible & ARM templates is not updated to create this . However needed to complete the above architecture diagram).
+8. Secondary sql server & failover group which would create a secondary database and enable replication. (ansible & ARM templates is not updated to create this. However needed to complete the above architecture diagram).
 
 **How to use:**
 
