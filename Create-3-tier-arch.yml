@@ -1,0 +1,133 @@
+---
+  - hosts: localhost
+    gather_facts: yes
+    connection: local
+    any_errors_fatal: true
+  
+    vars:
+# Most of these variables can be taken as input via survey variables in Ansible Template. However for the purpose of this , I am hardcoding the values here.
+      var_location: "eastus"
+      var_subscriptionID: "<YOUR-SUBSCRIPTION-ID>"
+      var_sasurl: "{{ ansible_env.SASURL }}" # Storage account url where all ARM templates are kept
+      var_sastoken: "{{ ansible_env.SASTOKEN }}" # Storage account SAS token
+      var_rgName: "TestRG"
+
+    tasks:
+
+    # The SPN is stored as credential(Type: Microsoft Azure Resource Manager) in Ansible Tower which automatically converts it into environment variable and can be used here.
+    - name: AZ Login to Azure
+      shell: >
+          az login --service-principal -u "{{ AZURE_CLIENT_ID }}" -p "{{ AZURE_SECRET }}" --tenant "{{ AZURE_TENANT }}";
+          az account set --subscription "{{ var_subscriptionID }}"
+      no_log: true
+
+    - name: Create Azure Resource Group
+      azure_rm_resourcegroup:
+        name: "{{ var_rgName }}"
+        location: "{{ var_location }}"
+        client_id: "{{ AZURE_CLIENT_ID }}"
+        secret: "{{ AZURE_SECRET }}"
+        tenant: "{{ AZURE_TENANT }}"
+        subscription_id: "{{ var_subscriptionID }}"
+        tags:
+          billingcode: "12393"
+          environment: "Test"
+
+    - name: Generate local admin password for Virtual Machines
+      raw: echo $(</dev/urandom tr -dc 'A-Za-z0-9#()*+=>?~' | head -c 32 )
+      no_log: "{{ var_AnsibleLogs }}"
+      register: adminpassword
+
+    - name: Trigger ARM template to provision resources
+      azure_rm_deployment:
+        deployment_name: "armdeployment"
+        location: "{{ var_location }}"
+        client_id: "{{ AZURE_CLIENT_ID }}"
+        secret: "{{ AZURE_SECRET }}"
+        tenant: "{{ AZURE_TENANT }}"
+        subscription_id: "{{ var_subscriptionID }}"
+        tags:
+          billingcode: "12393"
+          environment: "Test"
+        parameters:
+          location:
+            value: "{{ var_location }}"
+          staurl:
+            value: "{{ var_sasurl }}"
+          sastoken:
+            value: "{{ var_sastoken }}"
+          localadminpassword:
+            value: "{{ adminpassword.stdout_lines[0] }}"
+        resource_group_name: "{{ var_rgName }}"
+        template_link: "{{ var_sasurl }}/maindeploy.json?{{var_sastoken }}"
+      no_log: true
+
+# This can be created using ARM template as well
+    - name: Create Public Load balancer
+      shell: >
+        az network public-ip create --name "mypublicIP" --resource-group "{{ var_rgName }}" --location "{{ var_location }}" --allocation-method "Static" --sku "Standard";
+        az network lb create --name "mypubliclb" --location {{ var_location }}--resource-group "{{ var_rgName }}";
+        az network lb frontend-ip create --name "mypubliclbfrontend" --lb-name "mypubliclb" --public-ip-name "mypublicIP" --resource-group "{{ var_rgName }}" --location "{{ var_location }}";
+
+    - name: Create Internal Load balancer
+      shell: >
+        az network lb create --name "myinternallb" --location {{ var_location }}--resource-group "{{ var_rgName }}"
+        az network lb frontend-ip create --name "myinternallbfrontend" --lb-name "myinternallb" --subnet "appsubnet" --vnet-name "myVnet" --resource-group "{{ var_rgName }}" --location "{{ var_location }}"
+
+# Associate NSGs to subnet
+
+    - name: Attach NSGs to subnets
+      shell: >
+        az network vnet subnet update -g "{{ var_rgName }}" -n "websubnet" --vnet-name "myVnet" --network-security-group webnsg
+        az network vnet subnet update -g "{{ var_rgName }}" -n appsubnet --vnet-name "myVnet" --network-security-group appnsg
+
+    # # Create Primary SQL resources    
+    # - name: Trigger ARM template to provision primary sql server and database
+    #   azure_rm_deployment:
+    #     deployment_name: "primarysqldeploy"
+    #     location: "{{ var_location }}"
+    #     client_id: "{{ AZURE_CLIENT_ID }}"
+    #     secret: "{{ AZURE_SECRET }}"
+    #     tenant: "{{ AZURE_TENANT }}"
+    #     subscription_id: "{{ var_subscriptionID }}"
+    #     tags:
+    #       billingcode: "12393"
+    #       environment: "Test"
+    #     parameters:
+    #       location:
+    #         value: "{{ var_location }}"
+    #       staurl:
+    #         value: "{{ var_sasurl }}"
+    #       sastoken:
+    #         value: "{{ var_sastoken }}"
+    #       localadminpassword:
+    #         value: "{{ adminpassword.stdout_lines[0] }}"
+    #     resource_group_name: "{{ var_rgName }}"
+    #     template_link: "{{ var_sasurl }}/primarysql.json?{{var_sastoken }}"
+    #   no_log: true
+
+    # # Create Secondary SQL resources  and failover group for replication to happen   
+    # - name: Trigger ARM template to provision primary sql server and database
+    #   azure_rm_deployment:
+    #     deployment_name: "secondarysqldeploy"
+    #     location: "{{ var_location }}"
+    #     client_id: "{{ AZURE_CLIENT_ID }}"
+    #     secret: "{{ AZURE_SECRET }}"
+    #     tenant: "{{ AZURE_TENANT }}"
+    #     subscription_id: "{{ var_subscriptionID }}"
+    #     tags:
+    #       billingcode: "12393"
+    #       environment: "Test"
+    #     parameters:
+    #       location:
+    #         value: "{{ var_location }}"
+    #       staurl:
+    #         value: "{{ var_sasurl }}"
+    #       sastoken:
+    #         value: "{{ var_sastoken }}"
+    #       localadminpassword:
+    #         value: "{{ adminpassword.stdout_lines[0] }}"
+    #     resource_group_name: "{{ var_rgName }}"
+    #     template_link: "{{ var_sasurl }}/secondarysql.json?{{var_sastoken }}"
+    #   no_log: true
+
