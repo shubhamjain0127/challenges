@@ -1,4 +1,4 @@
-# challenges
+# Challenges
 - **Challenge1**: Create a 3-tier architecture.
 
 Architecture Diagram:
@@ -15,6 +15,24 @@ Prerquisite:
 4. Valid Subsciption and SPN with Contibutor permissions in the subscription.
 5. Create a credential in Ansible Tower of type Microsoft Azure Resource Manager and attach it to the template.
 
+**Introduction**:
+
+Here we will be creating below resources:
+
+1. A Public Load balancer which is internet facing ( Here I have just created a public lb but not configured it)
+2. An internal load balancer which will distrubute traffic from web tier to app tier
+3. NSGs for web & app subnets (here I have not configured NSG rules but they are needed to restrict the incoming traffic)
+4. a Vnet and 2 subnets (app & web)
+5. 2 availability sets (1 for app vms 1 for web vms)
+6. 4 VMs , 2 for app 2 for web
+7. Primary sql server & database (code is not update to create. However need to complete the above architecture diagram).
+8. Secondary sql server & failover group which would create a secondary database and enable replication.
+
+**How to use:**
+
+1. Keep the arm templates in astorage account and create a SAS token which will be used in ansible playbook environment variables.
+2. Create Ansible Tower Project & Template. Also attach SPN credential to the template.
+3. Trigger the ansible template from UI or using API . (we can include survey variables in the template. For the purpose of this I have not used many variables)
 
 - **Challenge 2:** We need to write code that will query the meta data of an instance within AWS and provide a
 json formatted output. The choice of language and implementation is up to you.
